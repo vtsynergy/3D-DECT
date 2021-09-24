@@ -3,8 +3,8 @@
 DDnet is a convolutional neural network that is used for computed tomography image enhancement. The network uses DenseNet blocks for building feature maps and Deconvolution for image reconstruction. DDnet shows superior performance compared to state-of-the-art CT image reconstruction/enhancement algorithms.
 
 Following sizes of CT scans can be enhanced using the given code.
-1. 512x512x32 (Folder: enhance512x512x32): The enhancement requires atleast 24 GBs GPU memory during training.  
-2. 512x512x64 (Folder: enhance512x512x64\_tiled): The enhancement requires atleast 8 GBs GPU memory during training. The memory requirement of enhancement is minimized by dividing the input CT scan into four volumes of equal size ("tiling"), before then feeding to the network.
+1. 512x512x32 (Folder: [enhance512x512x32](https://github.com/garvit217-vt/3D-DECT/tree/main/enhance512x512x32)): The enhancement requires atleast 24 GBs GPU memory during training.  
+2. 512x512x64 (Folder: [enhance512x512x64\_tiled](https://github.com/garvit217-vt/3D-DECT/tree/main/enhance512x512x64_tiled)): The enhancement requires atleast 8 GBs GPU memory during training. The memory requirement of enhancement is minimized by dividing the input CT scan into four volumes of equal size ("tiling"), before then feeding to the network.
 
 ## Platform
 We developed the framework on the platform shown below:
