@@ -2,6 +2,10 @@
 
 DDnet is a convolutional neural network that is used for computed tomography image enhancement. The network uses DenseNet blocks for building feature maps and Deconvolution for image reconstruction. DDnet shows superior performance compared to state-of-the-art CT image reconstruction/enhancement algorithms.
 
+Following sizes of CT scans can be enhanced using the given code.
+1. 512x512x32 (Folder: enhance512x512x32): The enhancement requires atleast 24 GBs GPU memory during training.  
+2. 512x512x64 (Folder: enhance512x512x64\_tiled): The enhancement requires atleast 8 GBs GPU memory during training. The memory requirement of enhancement is minimized by dividing the input CT scan into four volumes of equal size ("tiling"), before then feeding to the network.
+
 ## Platform
 We developed the framework on the platform shown below:
 
@@ -49,6 +53,8 @@ pip install nibabel
 The Cuda compilation tools could be download [here](https://developer.nvidia.com/cuda-downloads). Install the Cuda compilation tool for your platform.
 
 ## How to run
+
+Go to the respective sub-folder, on the basis of the size of CT scan, and follow steps given below. 
 
 1. Following the [Pre-processing Instruction](https://github.com/vtsynergy/2D-DECT/blob/a739ec299051f5b0526202a456994890cdd8e494/Pre-processing_Instruction.md), convert all CT scans to TIFF format (TIFF images must be represented in Hounds Field (HF) unit), and put all CT scans in ../2D-DECT/Images/original_data/. Each scan should be in separate folders.
 
