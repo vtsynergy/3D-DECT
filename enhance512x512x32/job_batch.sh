@@ -43,7 +43,7 @@ mkdir ./visualize/test/diff_target_in/
 mkdir ./visualize/test/input/
 mkdir ./visualize/test/target/
 
-python train_main3_2.py -n 1 -g 2 --batch 1 --epochs 50 -nr 0 > log1 &
+python train_main3_2.py -n 1 -g 2 --batch 1 --epochs 50 -nr 0 > log1 
 #python train_main3_2.py -n 1 -g 2 --batch 1 --epochs 50 -nr 0 > log2 &
 
 
