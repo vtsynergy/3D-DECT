@@ -1,4 +1,4 @@
-# DenseNet and Deconvolution Neural Network (DDnet) for Image enhancement
+# DenseNet and Deconvolution Neural Network (DDnet) for Volumetric enhancement
 
 DDnet is a convolutional neural network that is used for computed tomography image enhancement. The network uses DenseNet blocks for building feature maps and Deconvolution for image reconstruction. DDnet shows superior performance compared to state-of-the-art CT image reconstruction/enhancement algorithms.
 
@@ -76,6 +76,6 @@ The folder structure should like shown in below:
 ## Output
 Following folders are produced as output from enhancement AI.
 1. reconstructed_images/test: This folder contains enhanced images generated as output from AI. Each scan is put in seperate folders. Each folder contains TIFF images.
-2. visualize/test/diff_target_enhanced: This folder contains the absolute difference maps between high-quality CT scans and enhanced CT scans in separated folders. Each folder contains TIFF images.
+2. visualize/test/diff_target_out: This folder contains the absolute difference maps between high-quality CT scans and enhanced CT scans in separated folders. Each folder contains TIFF images.
 3. visualize/test/diff_target_in: This folder contains the absolute difference maps between high-quality CT scans and low-quality CT scans in separated folders. Each folder contains TIFF images.
 
