@@ -441,13 +441,16 @@ class DD_net(nn.Module):
 
         return  output
 
-def gen_visualization_files(outputs, targets, inputs, file_names, val_test):
+def gen_visualization_files(outputs, targets, inputs, file_names, val_test, maxs, mins):
     mapped_root = "./visualize/" + val_test + "/mapped/"
     diff_target_out_root = "./visualize/" + val_test + "/diff_target_out/"
     diff_target_in_root = "./visualize/" + val_test + "/diff_target_in/"
     ssim_root = "./visualize/" + val_test + "/ssim/"
     input_root = "./visualize/" + val_test + "/input/"
     target_root = "./visualize/" + val_test + "/target/"
+    mapped_input_root = "./visualize/" + val_test + "/mapped/input/"
+    mapped_target_root = "./visualize/" + val_test + "/mapped/target/"
+    mapped_output_root = "./visualize/" + val_test + "/mapped/output/"
     out_root = "./visualize/" + val_test + "/"
 
     '''
@@ -491,12 +494,32 @@ def gen_visualization_files(outputs, targets, inputs, file_names, val_test):
     (num_vol, channel, num_img, height, width) = outputs.size()
     for i in range(num_vol):
         file_name = file_names[i]
+        
+
         for j in range(num_img):
             output_img = outputs[i, 0, j, :, :].cpu().detach().numpy()
             target_img = targets[i, 0, j, :, :].cpu().numpy()
             input_img = inputs[i, 0, j, :, :].cpu().numpy()
 
+            output_img_mapped = (output_img * (maxs[i].item() - mins[i].item())) + mins[i].item()
+            target_img_mapped = (target_img * (maxs[i].item() - mins[i].item())) + mins[i].item()
+            input_img_mapped = (input_img * (maxs[i].item() - mins[i].item())) + mins[i].item()
             
+            im = Image.fromarray(input_img_mapped)
+            if not os.path.exists(mapped_input_root + "/" + file_name + "/"):
+                os.makedirs(mapped_input_root + "/" + file_name + "/")
+            im.save(mapped_input_root + "/" + file_name + "/" +  "img_" + str(j) + ".tif")
+
+            im = Image.fromarray(output_img_mapped)
+            if not os.path.exists(mapped_output_root + "/" + file_name + "/"):
+                os.makedirs(mapped_output_root + "/" + file_name + "/")
+            im.save(mapped_output_root + "/" + file_name + "/" +  "img_" + str(j) + ".tif")
+
+            im = Image.fromarray(target_img_mapped)
+            if not os.path.exists(mapped_target_root + "/" + file_name + "/"):
+                os.makedirs(mapped_target_root + "/" + file_name + "/")
+            im.save(mapped_target_root + "/" + file_name + "/" +  "img_" + str(j) + ".tif")
+
             im = Image.fromarray(input_img)
             if not os.path.exists(input_root + "/" + file_name + "/"):
                 os.makedirs(input_root + "/" + file_name + "/")
@@ -753,7 +776,9 @@ class VolCTDataset(Dataset):
 
         sample = {'vol': input_file,
                   'HQ': target_vol,
-                  'LQ': input_vol}
+                  'LQ': input_vol, 
+                  'max': cmax_target,
+                  'min': cmin_target}
 
         return sample
 
@@ -773,6 +798,7 @@ def dd_train(gpu, args):
     epochs = args.epochs
 
     root_dir = "./Images/original_data"
+    #root_dir = "/home/garvit/data_3d_1/"
     trainset = VolCTDataset(root_dir= root_dir + '/train')
     testset = VolCTDataset(root_dir= root_dir + '/test')
     valset = VolCTDataset(root_dir= root_dir + '/validate')
@@ -864,7 +890,7 @@ def dd_train(gpu, args):
             for batch_index, batch_samples in enumerate(train_loader):
                 #print("Batch count: ", count_batch)
                 count_batch = count_batch + 1
-                file_name, HQ_img, LQ_img = batch_samples['vol'], batch_samples['HQ'], batch_samples['LQ']
+                file_name, HQ_img, LQ_img, img_max, img_min = batch_samples['vol'], batch_samples['HQ'], batch_samples['LQ'], batch_samples['max'], batch_samples['min']
                 inputs = LQ_img.to(gpu)
                 targets = HQ_img.to(gpu)
 
@@ -884,7 +910,7 @@ def dd_train(gpu, args):
             scheduler.step()
             #print("Validation")
             for batch_index1, batch_samples1 in enumerate(val_loader):
-                file_name, HQ_img, LQ_img = batch_samples1['vol'], batch_samples1['HQ'], batch_samples1['LQ']
+                file_name, HQ_img, LQ_img, img_max, img_min = batch_samples1['vol'], batch_samples1['HQ'], batch_samples1['LQ'], batch_samples1['max'], batch_samples1['min']
 
                 inputs = LQ_img.to(gpu)
                 targets = HQ_img.to(gpu)
@@ -909,7 +935,7 @@ def dd_train(gpu, args):
                             if not os.path.exists("./reconstructed_images/val/" + file_name[m] + "/"):
                                 os.makedirs("./reconstructed_images/val/"+ file_name[m] + "/")
                             im.save('reconstructed_images/val/' + file_name[m] + "/" +  "img_" + str(i) + ".tif")
-                    gen_visualization_files(outputs, targets, inputs, file_name, "val")
+                    gen_visualization_files(outputs, targets, inputs, file_name, "val", img_max, img_min)
 
             if((k%10==0) and (k!=0)):
                 if(rank == 0):
@@ -980,7 +1006,7 @@ def dd_train(gpu, args):
     with torch.no_grad():
 
         for batch_index, batch_samples in enumerate(test_loader):
-            file_name, HQ_img, LQ_img = batch_samples['vol'], batch_samples['HQ'], batch_samples['LQ']
+            file_name, HQ_img, LQ_img, img_max, img_min = batch_samples['vol'], batch_samples['HQ'], batch_samples['LQ'], batch_samples['max'], batch_samples['min']
             print(file_name)
             inputs = LQ_img.to(gpu)
             targets = HQ_img.to(gpu)
@@ -1009,7 +1035,7 @@ def dd_train(gpu, args):
                     if not os.path.exists("./reconstructed_images/test/" + file_name[m] + "/"):
                         os.makedirs("./reconstructed_images/test/"+ file_name[m] + "/")
                     im.save('reconstructed_images/test/' + file_name[m] + "/" +  "img_" + str(i) + ".tif")
-            gen_visualization_files(outputs, targets, inputs, file_name, "test")
+            gen_visualization_files(outputs, targets, inputs, file_name, "test", img_max, img_min)
 
         print("testing end")
 
@@ -1029,20 +1055,20 @@ def main():
                         help='number of data loading workers (default: 4)')
     parser.add_argument('-g', '--gpus', default=1, type=int,
                         help='number of gpus per node')
-    #parser.add_argument('-nr', '--nr', default=0, type=int,
-    #                    help='ranking within the nodes')
+    parser.add_argument('-nr', '--nr', default=0, type=int,
+                        help='ranking within the nodes')
     parser.add_argument('--epochs', default=2, type=int, metavar='N',
                         help='number of total epochs to run')
     parser.add_argument('--batch', default=2, type=int, metavar='N',
                         help='number of batch per gpu')
     args = parser.parse_args()
     args.world_size = args.gpus * args.nodes
-    args.nr = int(os.environ['SLURM_PROCID'])
+    #args.nr = int(os.environ['SLURM_PROCID'])
     #world_size = 4
-    #os.environ['MASTER_ADDR'] = 'localhost'
+    os.environ['MASTER_ADDR'] = 'localhost'
     #os.environ['MASTER_ADDR'] = '10.21.10.4'
     #os.environ['MASTER_PORT'] = '12355'
-    #os.environ['MASTER_PORT'] = '8888'
+    os.environ['MASTER_PORT'] = '8888'
     mp.spawn(dd_train,
         args=(args,),
         nprocs=args.gpus,
