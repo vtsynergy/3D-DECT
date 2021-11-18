@@ -27,7 +27,7 @@ def join_images(reconstructed_images):
             tile4_list.append(scan.replace("tile1", "tile4"))
             scan_name_list.append(scan.replace("tile1_", ""))
 
-    print(scan_name_list)
+    #print(scan_name_list)
     
     for i in range(len(tile1_list)):
     

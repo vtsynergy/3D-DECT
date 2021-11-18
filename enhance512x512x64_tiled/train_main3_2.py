@@ -714,9 +714,9 @@ class VolCTDataset(Dataset):
                 image_target = image_target.astype(float)
                 image_input = image_input.astype(float)
  
-                if("BIMCV" in input_file):
-                    image_target = np.rot90(image_target)
-                    image_input = np.rot90(image_input)
+                #if("BIMCV" in input_file):
+                #    image_target = np.rot90(image_target)
+                #    image_input = np.rot90(image_input)
     
                 #image_target = torch.from_numpy(image_target.reshape((1, 1, size_img, size_img)).copy())
                 #image_target = F.interpolate(image_target.type(torch.FloatTensor), size=(out_size_image, out_size_image))
